@@ -13,6 +13,7 @@ export class DashboardComponent implements OnInit {
   contacts: any;
   selectedContact: Contact;
   loggedUser: any;
+  loading: any = true;
 
   constructor(private forceService: ForceService) {
     this.forceService.init({
@@ -24,18 +25,26 @@ export class DashboardComponent implements OnInit {
   ngOnInit() {
     if (this.forceService.isLoggedIn()) {
       this.onLogin();
+    } else {
+      this.loading = false;
     }
   }
 
   onLogin() {
+    this.loading = true;
     this.forceService.login().then(() => {
+      this.loading = false;
       this.loggedUser = this.forceService.getUserId();
       this.getData();
     });
   }
 
   getData() {
-    this.forceService.query('select id, firstname, lastname, phone from contact').then(result => this.contacts = (<any>result).records);
+    this.loading = true;
+    this.forceService.query('select id, firstname, lastname, phone from contact').then(result => {
+      this.loading = false;
+      this.contacts = (<any>result).records;
+    });
   }
 
   onSelect(contact: Contact) {
